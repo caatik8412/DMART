@@ -820,7 +820,7 @@ function printInvoice(inv){
 }
 
 function printCSS(){
-  return '<style>*{box-sizing:border-box;margin:0;padding:0;}'
+  return '<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}'
     +'body{font-family:Arial,sans-serif;font-size:11px;color:#000;background:#fff;}'
     +'.doc{width:100%;max-width:200mm;margin:0 auto;padding:8mm 10mm;}'
     +'table{width:100%;border-collapse:collapse;}'
@@ -861,7 +861,7 @@ function printCSS(){
     +'.signfor{font-weight:700;color:#1f3864;margin-top:18px;}'
     +'.signline{margin-top:30px;text-align:center;color:#2e75b6;font-weight:700;font-size:10px;}'
     +'.eoe{text-align:right;font-style:italic;font-size:9.5px;margin-bottom:4px;}'
-    +'@media print{.no-print{display:none!important;}}</style>';
+    +'@media print{.no-print{display:none!important;}body,.doc,.band,.custbar,.itable th,.totrow td,.wordsbar,.taxrow.final,.termsbar{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}}</style>';
 }
 
 function invoiceHTML(inv){
