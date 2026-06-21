@@ -870,8 +870,8 @@ function invoiceHTML(inv){
     return '<tr><td class="l">'+esc(it.name)+'</td><td style="text-align:center;">'+esc(it.hsn)+'</td>'
       +'<td style="text-align:center;">'+it.qty+'</td><td class="r">'+(it.mrp?fmt2(it.mrp):'')+'</td>'
       +'<td class="r">'+fmt2(it.rate)+'</td><td class="r">'+fmt2(it.taxable)+'</td>'
-      +'<td class="r">'+it.gstPct.toFixed(2)+'%</td><td class="r">'+fmt2(it.cgstAmt)+'</td>'
-      +'<td class="r">'+it.gstPct.toFixed(2)+'%</td><td class="r">'+fmt2(it.sgstAmt)+'</td>'
+      +'<td class="r">'+(it.gstPct/2).toFixed(2)+'%</td><td class="r">'+fmt2(it.cgstAmt)+'</td>'
+      +'<td class="r">'+(it.gstPct/2).toFixed(2)+'%</td><td class="r">'+fmt2(it.sgstAmt)+'</td>'
       +'<td class="r" style="font-weight:600;">'+fmt2(it.total)+'</td></tr>';
   }).join('');
   // pad empty rows for visual match to template (min 6 rows shown)
