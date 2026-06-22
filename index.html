@@ -637,7 +637,7 @@ function renderInvoices(){
     window._invs=window._invs||{};window._invs[idx]=inv;
     return '<tr class="row">'
       +'<td style="font-weight:600;">#'+esc(inv.invoiceNo)+'</td>'
-      +'<td style="font-size:12px;color:var(--muted);">'+esc(inv.date)+'</td>'
+      +'<td style="font-size:12px;color:var(--muted);">'+esc(fmtDateShort(inv.date))+'</td>'
       +'<td class="amt">₹'+fmt(inv.taxable)+'</td>'
       +'<td class="amt">₹'+fmt(inv.cgst)+'</td>'
       +'<td class="amt">₹'+fmt(inv.sgst)+'</td>'
@@ -710,7 +710,7 @@ function fetchCancelledInvoices(){
       var reason=parts[1]||'—',ts=parts[2]||'';
       return '<tr class="row" style="opacity:.7;">'
         +'<td style="font-weight:600;text-decoration:line-through;color:var(--muted);">#'+esc(inv.invoiceNo)+'</td>'
-        +'<td style="font-size:12px;color:var(--muted);">'+esc(inv.date)+'</td>'
+        +'<td style="font-size:12px;color:var(--muted);">'+esc(fmtDateShort(inv.date))+'</td>'
         +'<td class="amt" style="text-decoration:line-through;color:var(--muted);">₹'+fmt(inv.total)+'</td>'
         +'<td><div style="font-size:12px;color:var(--red);">'+esc(reason)+'</div><div style="font-size:10px;color:var(--muted);">'+esc(ts)+'</div></td>'
       +'</tr>';
@@ -744,7 +744,7 @@ function loadGSTR1(){
       return '<tr class="row">'
         +'<td style="color:var(--muted);font-size:12px;">'+(i+1)+'</td>'
         +'<td style="font-weight:600;">#'+esc(inv.invoiceNo)+'</td>'
-        +'<td style="font-size:12px;">'+esc(inv.date)+'</td>'
+        +'<td style="font-size:12px;">'+esc(fmtDateShort(inv.date))+'</td>'
         +'<td class="amt">₹'+fmt(inv.taxable)+'</td>'
         +'<td class="amt">₹'+fmt(inv.cgst)+'</td>'
         +'<td class="amt">₹'+fmt(inv.sgst)+'</td>'
@@ -892,7 +892,7 @@ function invoiceHTML(inv){
     +'<div class="custbar">Customer Detail</div>'
     +'<table class="custtbl">'
       +'<tr><td class="lbl">M/S</td><td colspan="2">'+esc(BUYER.name)+'</td><td class="lbl">Invoice No.</td><td>'+esc(inv.invoiceNo)+'</td></tr>'
-      +'<tr><td class="lbl">Address</td><td colspan="2">'+esc(BUYER.address)+'</td><td class="lbl">Invoice Date</td><td>'+esc(inv.date)+'</td></tr>'
+      +'<tr><td class="lbl">Address</td><td colspan="2">'+esc(BUYER.address)+'</td><td class="lbl">Invoice Date</td><td>'+esc(fmtDateShort(inv.date))+'</td></tr>'
       +'<tr><td class="lbl">Phone</td><td colspan="2">-</td><td class="lbl">Due Date</td><td></td></tr>'
       +'<tr><td class="lbl">GSTIN</td><td colspan="4">'+esc(BUYER.gstin)+'</td></tr>'
       +'<tr><td class="lbl">PAN</td><td colspan="4">'+esc(BUYER.pan)+'</td></tr>'
@@ -906,7 +906,7 @@ function invoiceHTML(inv){
         +'<th colspan="2">CGST</th><th colspan="2">SGST</th><th rowspan="2">Total</th>'
       +'</tr><tr><th>%</th><th>Amount</th><th>%</th><th>Amount</th></tr></thead>'
       +'<tbody>'+rows+padRows+'</tbody>'
-      +'<tfoot><tr class="totrow"><td colspan="5">Total</td><td>₹'+fmt2(inv.taxable)+'</td><td colspan="4"></td><td>₹'+fmt2(inv.total)+'</td></tr></tfoot>'
+      +'<tfoot><tr class="totrow"><td colspan="5">Total</td><td>₹'+fmt2(inv.taxable)+'</td><td colspan="4"></td><td>₹'+fmt(Math.round(inv.total))+'</td></tr></tfoot>'
     +'</table>'
     +'<div class="bottomgrid">'
       +'<div class="wordsbox"><div class="wordsbar">Total in words</div>'
@@ -916,7 +916,8 @@ function invoiceHTML(inv){
         +'<div class="taxrow"><span>Add : CGST</span><span>'+fmt2(inv.cgst)+'</span></div>'
         +'<div class="taxrow"><span>Add : SGST</span><span>'+fmt2(inv.sgst)+'</span></div>'
         +'<div class="taxrow"><span>Total Tax</span><span>'+fmt2(inv.cgst+inv.sgst)+'</span></div>'
-        +'<div class="taxrow final"><span>Total Amount After Tax</span><span>'+fmt2(inv.total)+'</span></div>'
+        +(roundOffStr(inv.total))
+        +'<div class="taxrow final"><span>Total Amount After Tax</span><span>'+fmt(Math.round(inv.total))+'</span></div>'
       +'</div>'
     +'</div>'
     +'<div class="termsgrid">'
@@ -956,7 +957,16 @@ function toast(msg,type){
   clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},3500);
 }
 function fmtDate(s){
-  var p=s.split('-'); return p[2]+'.'+p[1]+'.'+p[0];
+  var p=s.split('-');
+  return p[2]+'-'+p[1]+'-'+p[0].slice(2);
+}
+// Converts "24 Apr 2026" (from backend) to "24-04-26"
+function fmtDateShort(s){
+  if(!s) return '—';
+  var m={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
+  var p=s.split(' ');
+  if(p.length===3 && m[p[1]]) return p[0].padStart(2,'0')+'-'+m[p[1]]+'-'+p[2].slice(2);
+  return s;
 }
 function parseDate(s){
   if(!s) return 0;
@@ -966,6 +976,14 @@ function parseDate(s){
   if(p.length===3) return new Date(parseInt(p[2]),m[p[1]]||0,parseInt(p[0])).getTime();
   if(p.length===1 && s.includes('.')){ var d=s.split('.'); return new Date(d[2],d[1]-1,d[0]).getTime(); }
   return new Date(s).getTime();
+}
+// Returns a "Round Off" tax-summary row HTML if rounding adjustment is non-zero, else ''
+function roundOffStr(total){
+  var rounded=Math.round(total);
+  var diff=rounded-total;
+  if(Math.abs(diff)<0.005) return '';
+  var sign=diff>=0?'+':'-';
+  return '<div class="taxrow"><span>Round Off</span><span>'+sign+fmt2(Math.abs(diff))+'</span></div>';
 }
 function fmt(n){return Math.round(n).toLocaleString('en-IN');}
 function fmt2(n){return Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
